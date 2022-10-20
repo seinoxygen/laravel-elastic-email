@@ -1,0 +1,41 @@
+{
+  "name": "seinoxygen/laravel-elastic-email",
+  "description": "A Laravel wrapper for Elastic Email",
+  "keywords": [
+    "laravel",
+    "email",
+    "elastic email"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "company": "",
+      "email": "seinoxygen@hotmail.com",
+      "url": ""
+    }
+  ],
+  "support": {
+    "email": "seinoxygen@hotmail.com"
+  },
+  "require": {
+    "php": "^7.1|^8.0",
+    "laravel/framework": "^6.0|^7.0|^8.0|^9.0",
+    "guzzlehttp/guzzle": "^6.3|^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "SeinOxygen\\ElasticEmail\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "SeinOxygen\\ElasticEmail\\MailServiceProvider"
+      ],
+      "aliases": {
+        "ElasticEmail": "SeinOxygen\\ElasticEmail\\Facades\\ElasticEmail"
+      }
+    }
+  },
+  "minimum-stability": "stable"
+}
