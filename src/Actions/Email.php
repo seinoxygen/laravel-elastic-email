@@ -217,6 +217,24 @@ class Email extends ApiClient
     }
 
     /**
+     * Verify single email address
+     * 
+     * @param string $email Email address to verify
+     * @param bool $updateStatus Update contact's status be changed automatically based on the validation result
+     * @param bool $uploadContacts Create contact if it does not exist
+     * 
+     * @return EmailValidation
+     */
+    public function Verify($email, $updateStatus = false, $uploadContacts = false)
+    {
+        return $this->request('email/verify', array(
+            'email' => $email,
+            'updateStatus' => $updateStatus,
+            'uploadContacts' => $uploadContacts
+        ));
+    }
+
+    /**
      * View email
      *
      * @param string $messageID Message identifier
