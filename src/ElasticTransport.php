@@ -27,6 +27,13 @@ class ElasticTransport extends Transport
      */
     protected $account;
 
+
+    /**
+     * If the email is transactional.
+     * @var string
+     */
+    protected $transactional;
+
     /**
      * THe Elastic Email API end-point.
      * @var string
@@ -42,11 +49,12 @@ class ElasticTransport extends Transport
      *
      * @return void
      */
-    public function __construct(ClientInterface $client, $key, $account)
+    public function __construct(ClientInterface $client, $config)
     {
         $this->client = $client;
-        $this->key = $key;
-        $this->account = $account;
+        $this->key = $config['key'];
+        $this->account = $config['account'];
+        $this->transactional = $config['transactional'];
     }
 
     /**
@@ -55,6 +63,11 @@ class ElasticTransport extends Transport
     public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = NULL)
     {
         $this->beforeSendPerformed($message);
+
+        $isTransactional = $this->transactional;
+        if(!is_null($message->getHeaders()->get('X-Transactional'))){
+            $isTransactional = $message->getHeaders()->get('X-Transactional')->getFieldBody();
+        }
 
         $data = [
             'api_key' => $this->key,
@@ -66,13 +79,31 @@ class ElasticTransport extends Transport
             'msgFromName' => $this->getFromAddress($message)['name'],
             'from' => $this->getFromAddress($message)['email'],
             'fromName' => $this->getFromAddress($message)['name'],
+            'replyTo' => $this->getReplyToAddress($message)['email'],
+            'replyToName' => $this->getReplyToAddress($message)['name'],
             'to' => $this->getEmailAddresses($message),
             'subject' => $message->getSubject(),
             'body_html' => $message->getBody(),
-            'body_text' => $this->getText($message)
+            'body_text' => $this->getText($message),
+            'isTransactional' => $isTransactional
         ];
 
         $attachments = $message->getChildren();
+        
+        $response = $this->sendEmail($data, $attachments);
+
+        // Inject the response data into the message headers.
+        if($response) {
+            $message->getHeaders()->addTextHeader('X-Message-ID', $response->messageid);
+            $message->getHeaders()->addTextHeader('X-Transaction-ID', $response->transactionid);
+        }
+
+        $this->sendPerformed($message);
+
+        return $response;
+    }
+
+    protected function sendEmail(array $data, array $attachments = []){
         if (!empty($attachments)) {
             $options['multipart'] = $this->parseMultipart($attachments, $data);
         } else {
@@ -87,20 +118,25 @@ class ElasticTransport extends Transport
             $url = str_replace('https:', 'http:', $url);
         }
 
-        $result = $this->client->request('POST', $url, $options);
+        try {
+            $result = $this->client->request('POST', $url, $options);
+        } catch (\Exception $e) {
+            throw $e;
+        }
 
-        // Inject the response data into the message instance.
         if($result->getStatusCode() == 200) {
             $response = $result->getBody()->getContents();
             $response = json_decode($response);
+            
             if($response->success) {
-                $message->elasticemail = $response->data;
+                return $response->data;
+            }
+            else{
+                throw new \Exception($response->error);
             }
         }
 
-        $this->sendPerformed($message);
-
-        return $result;
+        return false;
     }
 
     /**
@@ -151,6 +187,23 @@ class ElasticTransport extends Transport
         }
 
         return '';
+    }
+
+    /**
+     * @param \Swift_Mime_Message $message
+     *
+     * @return array
+     */
+    protected function getReplyToAddress(Swift_Mime_SimpleMessage $message)
+    {
+        if (!$message->getReplyTo()) {
+            return $this->getFromAddress($message);
+        }
+
+        return [
+            'email' => array_keys($message->getReplyTo())[0],
+            'name' => array_values($message->getReplyTo())[0],
+        ];
     }
 
     /**

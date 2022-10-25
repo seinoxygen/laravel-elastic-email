@@ -16,8 +16,8 @@ class OnEmailSent
         $body           = $this->parseBodyText($event->message->getBody());
         
         $log = ElasticEmailOutbound::create([
-            'message_id' => $event->message->elasticemail->messageid,
-            'transaction_id' => $event->message->elasticemail->transactionid,
+            'message_id' => $event->message->getHeaders()->get('X-Message-ID')->getFieldBody() ?? null,
+            'transaction_id' => $event->message->getHeaders()->get('X-Transaction-ID')->getFieldBody() ?? null,
             'from' => $from[0],
             'to' => json_encode($toArr),
             'cc' => $ccArr ? json_encode($ccArr) : NULL,

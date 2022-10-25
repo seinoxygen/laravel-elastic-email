@@ -8,13 +8,11 @@ class TransportManager extends MailManager
 {
     protected function createElasticEmailTransport()
     {
-        
-        $config = $this->app['config']->get('services.elastic_email', []);
+        $config = array_merge($this->app['config']->get('services.elastic_email', []), $this->app['config']->get('elasticemail', []));
 
         return new ElasticTransport(
             $this->guzzle($config),
-            $config['key'],
-            $config['account']
+            $config
         );
     }
 }
