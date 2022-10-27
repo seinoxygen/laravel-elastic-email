@@ -24,8 +24,8 @@ class CreateElasticEmailHitsTable extends Migration
 
         Schema::create('elastic_email_outbound', function (Blueprint $table) {
             $table->id();
-            $table->string('message_id')->unique();
-            $table->uuid('transaction_id')->unique();
+            $table->string('message_id')->nullable()->unique();
+            $table->uuid('transaction_id')->nullable()->unique();
             $table->string('from');
             $table->string('to');
             $table->string('cc')->nullable();

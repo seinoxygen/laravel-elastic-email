@@ -12,6 +12,11 @@ class OnWebhookCall
     public function handle(WebhookCallReceived $event)
     {
         if (config('elasticemail.save_hits')) {
+            
+            if(!isset($event->request->transaction) || !isset($event->request->messageid)){
+                return false;
+            }
+
             ElasticEmailHit::create([
                 'transaction_id' => $event->request->transaction,
                 'message_id' => $event->request->messageid,
