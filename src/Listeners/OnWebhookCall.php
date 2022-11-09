@@ -24,9 +24,13 @@ class OnWebhookCall
                 'data' => $event->request->all()
             ]);
 
-            $response = ElasticEmail::Email()->GetStatus($event->request->transaction, $showFailed = false, $showSent = true, $showDelivered = true, $showPending = true, $showOpened = true, $showClicked = false, $showAbuse = false, $showUnsubscribed = false, $showErrors = false, $showMessageIDs = false);
-
             $outbound = ElasticEmailOutbound::where('transaction_id', $event->request->transaction)->first();
+
+            if(is_null($outbound)){
+                return false;
+            }
+
+            $response = ElasticEmail::Email()->GetStatus($event->request->transaction, $showFailed = false, $showSent = true, $showDelivered = true, $showPending = true, $showOpened = true, $showClicked = false, $showAbuse = false, $showUnsubscribed = false, $showErrors = false, $showMessageIDs = false);
 
             if($response->deliveredcount > 0 && is_null($outbound->delivered_at)){
                 $outbound->delivered_at = now();
