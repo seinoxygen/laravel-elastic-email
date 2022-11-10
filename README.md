@@ -1,6 +1,6 @@
 # Laravel Elastic Email #
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=6CYVR8U4VDMAA)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=6CYVR8U4VDMAA) ![Packagist Downloads](https://img.shields.io/packagist/dt/seinoxygen/laravel-elastic-email?label=Downloads)
 
 A Laravel wrapper for sending emails via Elastic Email service and API capabilities that allows you to check the status of every email sent.
 It provides a basic email log table to store all outbound emails where you can link to a model.
