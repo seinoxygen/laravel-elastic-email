@@ -81,7 +81,6 @@ class ElasticTransport extends Transport
             'fromName' => $this->getFromAddress($message)['name'],
             'replyTo' => $this->getReplyToAddress($message)['email'],
             'replyToName' => $this->getReplyToAddress($message)['name'],
-            'to' => $this->getEmailAddresses($message),
             'subject' => $message->getSubject(),
             'body_html' => $message->getBody(),
             'body_text' => $this->getText($message),
