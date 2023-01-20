@@ -15,9 +15,10 @@ class OnEmailSent
         $from           = $this->parseAddresses($event->message->getFrom());
         $body           = $this->parseBodyText($event->message->getBody());
         
+        
         $log = ElasticEmailOutbound::create([
-            'message_id' => !is_null($event->message->getHeaders()->get('X-Message-ID')) ? $event->message->getHeaders()->get('X-Message-ID')->getFieldBody() : $event->message->getId(),
-            'transaction_id' => !is_null($event->message->getHeaders()->get('X-Transaction-ID')) ? $event->message->getHeaders()->get('X-Transaction-ID')->getFieldBody() : $event->message->getId(),
+            'message_id' => !is_null($event->message->getHeaders()->get('X-Message-ID')) ? $event->message->getHeaders()->get('X-Message-ID')->getFieldBody() : $this->parseMessageId($event->message->getId()),
+            'transaction_id' => !is_null($event->message->getHeaders()->get('X-Transaction-ID')) ? $event->message->getHeaders()->get('X-Transaction-ID')->getFieldBody() : $this->parseMessageId($event->message->getId()),
             'from' => $from[0],
             'to' => json_encode($toArr),
             'cc' => $ccArr ? json_encode($ccArr) : NULL,
@@ -32,6 +33,11 @@ class OnEmailSent
             }
         }
         return false;
+    }
+
+    private function parseMessageId($messageId): string
+    {
+        return explode('@', $messageId)[0];
     }
 
     private function parseAddresses(array $array): array
